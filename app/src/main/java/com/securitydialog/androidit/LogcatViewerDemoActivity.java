@@ -123,8 +123,8 @@ public class LogcatViewerDemoActivity extends ListActivity {
     }
 
     private class LogReaderTask extends AsyncTask<Void, String, Void> {
-        private final String[] LOGCAT_CMD = new String[]{"logcat"};
-        private final int BUFFER_SIZE = 1024;
+
+        private final int BUFFER_SIZE = 4096;
 
         private boolean isRunning = true;
         private Process logprocess = null;
@@ -134,7 +134,7 @@ public class LogcatViewerDemoActivity extends ListActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                logprocess = Runtime.getRuntime().exec(LOGCAT_CMD);
+                logprocess = Runtime.getRuntime().exec("logcat -v threadtime");
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -150,11 +150,11 @@ public class LogcatViewerDemoActivity extends ListActivity {
                 isRunning = false;
             }
 
-            line = new String[1];
+            String line;
 
             try {
                 while (isRunning) {
-                    line[0] = reader.readLine();
+                    line = reader.readLine();
 
                     publishProgress(line);
                 }

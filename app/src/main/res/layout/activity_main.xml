@@ -16,7 +16,6 @@
         android:layout_below="@+id/helloWorld"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="101dp"
-        android:layout_marginEnd="101dp" />
+ />
 
 </RelativeLayout>
