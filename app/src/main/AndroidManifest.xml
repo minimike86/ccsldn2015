@@ -17,5 +17,6 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-permission android:name="android.permission.read_logs"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>

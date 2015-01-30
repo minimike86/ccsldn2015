@@ -91,8 +91,8 @@ public class Syslog {
         return msg;
     }
 
-    public void setMsg(String tag, String msg) {
-        this.msg = tag + msg;
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
     @Override

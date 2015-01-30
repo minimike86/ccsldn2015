@@ -1,8 +1,13 @@
 package com.securitydialog.androidit;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LogcatViewerDemoActivity extends ListActivity {
     private LogStringAdaptor adaptor = null;
@@ -35,7 +41,6 @@ public class LogcatViewerDemoActivity extends ListActivity {
         setListAdapter(adaptor);
 
         logReaderTask = new LogReaderTask();
-
         logReaderTask.execute();
     }
 
@@ -128,14 +133,14 @@ public class LogcatViewerDemoActivity extends ListActivity {
         private final int BUFFER_SIZE = 4096;
 
         private boolean isRunning = true;
-        private Process logprocess = null;
+        private Process logProcess = null;
         private BufferedReader reader = null;
         private String[] line = null;
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                logprocess = Runtime.getRuntime().exec("logcat");
+                logProcess = Runtime.getRuntime().exec("logcat");
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -144,7 +149,7 @@ public class LogcatViewerDemoActivity extends ListActivity {
 
             try {
                 reader = new BufferedReader(new InputStreamReader(
-                        logprocess.getInputStream()), BUFFER_SIZE);
+                        logProcess.getInputStream()), BUFFER_SIZE);
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
 
@@ -161,9 +166,32 @@ public class LogcatViewerDemoActivity extends ListActivity {
                     Random r = new Random();
                     Syslog syslog = new Syslog(r.nextInt(191), line);
                     // Update ListView
-                    publishProgress(line + "\n" + "Syslog: " + syslog.toString() );
+                    publishProgress(line + "\n" + "Syslog: " + syslog.toString());
+                    // Send syslog message
+                    Socket socket = null;
+                    try {
+                        socket = new Socket("10.100.94.71", 1468); //514UDP or 1468TCP
+                        PrintWriter out = new PrintWriter(socket.getOutputStream());
+                        out.print(syslog.toString()+"\r\n");
+                        out.flush(); // Send it now.
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (socket != null) {
+                            try {
+                                socket.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+                isRunning = false;
+            } catch (NullPointerException e) {
                 e.printStackTrace();
                 isRunning = false;
             }
@@ -195,7 +223,8 @@ public class LogcatViewerDemoActivity extends ListActivity {
 
         public void stopTask() {
             isRunning = false;
-            logprocess.destroy();
+            logProcess.destroy();
         }
     }
+
 }
