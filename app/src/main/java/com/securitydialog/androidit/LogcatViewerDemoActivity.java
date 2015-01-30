@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -134,7 +135,7 @@ public class LogcatViewerDemoActivity extends ListActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                logprocess = Runtime.getRuntime().exec("logcat -v threadtime");
+                logprocess = Runtime.getRuntime().exec("logcat");
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -154,13 +155,16 @@ public class LogcatViewerDemoActivity extends ListActivity {
 
             try {
                 while (isRunning) {
+                    // Read logcat line
                     line = reader.readLine();
-
-                    publishProgress(line);
+                    // Build syslog from logcat line
+                    Random r = new Random();
+                    Syslog syslog = new Syslog(r.nextInt(191), line);
+                    // Update ListView
+                    publishProgress(line + "\n" + "Syslog: " + syslog.toString() );
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-
                 isRunning = false;
             }
 
